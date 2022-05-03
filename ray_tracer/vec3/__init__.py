@@ -92,7 +92,7 @@ class Vector3D:
     def print_vector(self) -> None:
         print(f'{self.v1} {self.v2} {self.v3}')
 
-    def l2_norm_squared(self) -> float:
+    def l2_norm_squared(self) -> Union[float, int]:
         return self.v1 ** 2 + self.v2 ** 2 + self.v3 ** 2
 
     def l2_norm(self) -> float:
