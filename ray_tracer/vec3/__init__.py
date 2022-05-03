@@ -46,7 +46,7 @@ class Vector:
         elif index == 2:
             return self.z
         else:
-            raise VectorIndexError("vector out of range")
+            raise VectorIndexError("index out of range")
 
     def __len__(self) -> int:
         return 3
