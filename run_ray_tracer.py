@@ -1,5 +1,5 @@
-import numpy as np
 from pathlib import Path
+from ray_tracer.vec3 import Point3D, Colour
 
 BASE_DIR = Path('./misc')
 IMAGE_FILE_NAME = 'image.ppm'
@@ -17,11 +17,10 @@ def main() -> None:
         image_file.write(f'P3\n{image_width} {image_height} \n{max_colour}\n')
         for j in range(image_height - 1, -1, -1):
             for i in range(0, image_width, 1):
-                r = int(255.999 * i / (image_width - 1))
-                g = int(255.999 * j / (image_height - 1))
-                b = int(255.999 * 0.25)
-
-                image_file.write(f'{r} {g} {b}\n')
+                colour = Colour(int(255.999 * i / (image_width - 1)),
+                                int(255.999 * j / (image_height - 1)),
+                                int(255.999 * 0.25))
+                image_file.write(f'{colour.x} {colour.y} {colour.z}\n')
 
 
 if __name__ == "__main__":
