@@ -3,22 +3,28 @@ from ray_tracer.vec3 import Vector3D, Point3D, Colour, to_unit_vector, dot
 from ray_tracer.ray import Ray
 
 BASE_DIR = Path('./misc')
-IMAGE_FILE_NAME = 'red_sphere_in_background.ppm'
+IMAGE_FILE_NAME = 'sphere_with_surface_normals.ppm'
 OUTPUT_IMAGE_FILE = BASE_DIR.joinpath(IMAGE_FILE_NAME)
 
 
-def hit_sphere(center: Point3D, radius: float, ray: Ray) -> bool:
+def hit_sphere(center: Point3D, radius: float, ray: Ray) -> float:
     oc: Vector3D = ray.origin - center
     a = dot(ray.direction, ray.direction)
     b = 2 * dot(ray.direction, oc)
     c = dot(oc, oc) - radius ** 2
     discriminant = b ** 2 - 4 * a * c
-    return discriminant > 0
+    if discriminant < 0:
+        return -1
+    else:
+        return (- b - discriminant ** 0.5) / (2 * a)
 
 
 def ray_colour(r: Ray) -> Colour:
-    if hit_sphere(Point3D(0, 0, -1), 0.5, r):
-        return Colour(1, 0, 0)
+    sphere_centre = Point3D(0, 0, -1)
+    t = hit_sphere(sphere_centre, 0.5, r)
+    if t > 0:
+        unit_normal_vector = to_unit_vector(r.at(t) - Vector3D(sphere_centre.x, sphere_centre.y, sphere_centre.z))
+        return 0.5 * Colour(unit_normal_vector.x + 1, unit_normal_vector.y + 1, unit_normal_vector.z + 1)
     unit_direction = to_unit_vector(r.direction)
     t: float = 0.5 * (unit_direction.y + 1.0)
     colour: Vector3D = (1.0 - t) * Colour(1.0, 1.0, 1.0) + t * Colour(0.5, 0.7, 1.0)
