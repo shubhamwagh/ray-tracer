@@ -1,25 +1,51 @@
 from pathlib import Path
-from ray_tracer.vec3 import Point3D, Colour
+from ray_tracer.vec3 import Vector3D, Point3D, Colour, to_unit_vector
+from ray_tracer.ray import Ray
 
 BASE_DIR = Path('./misc')
-IMAGE_FILE_NAME = 'image.ppm'
+IMAGE_FILE_NAME = 'background.ppm'
 OUTPUT_IMAGE_FILE = BASE_DIR.joinpath(IMAGE_FILE_NAME)
+
+
+def ray_colour(r: Ray) -> Colour:
+    unit_direction = to_unit_vector(r.direction)
+    t: float = 0.5 * (unit_direction.y + 1.0)
+    colour: Vector3D = (1.0 - t) * Colour(1.0, 1.0, 1.0) + t * Colour(0.5, 0.7, 1.0)
+    return Colour(colour.x, colour.y, colour.z)
+
+
+def unnormalise_pixel_colour(colour: Colour) -> Colour:
+    colour *= 255.999
+    return Colour(int(colour.x), int(colour.y), int(colour.z))
 
 
 def main() -> None:
     # Image
-    image_width = 256
-    image_height = 256
+    aspect_ratio = 16.0 / 9.0
+    image_width = 400
+    image_height = int(image_width / aspect_ratio)
     max_colour = 255
+
+    # Camera
+    viewport_height = 2.0
+    viewport_width = aspect_ratio * viewport_height
+    focal_length = 1.0
+
+    origin = Point3D(0, 0, 0)
+    horizontal = Vector3D(viewport_width, 0, 0)
+    vertical = Vector3D(0, viewport_height, 0)
+    # lower left corner coordinate vector of viewport
+    lower_left_corner = origin - horizontal * 0.5 - vertical * 0.5 - Vector3D(0, 0, focal_length)
 
     # Render
     with open(OUTPUT_IMAGE_FILE.as_posix(), 'w') as image_file:
         image_file.write(f'P3\n{image_width} {image_height} \n{max_colour}\n')
         for j in range(image_height - 1, -1, -1):
             for i in range(0, image_width, 1):
-                colour = Colour(int(255.999 * i / (image_width - 1)),
-                                int(255.999 * j / (image_height - 1)),
-                                int(255.999 * 0.25))
+                u = i / (image_width - 1)
+                v = j / (image_height - 1)
+                r = Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin)
+                colour = unnormalise_pixel_colour(ray_colour(r))
                 image_file.write(f'{colour.x} {colour.y} {colour.z}\n')
 
 
