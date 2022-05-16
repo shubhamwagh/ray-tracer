@@ -1,13 +1,24 @@
 from pathlib import Path
-from ray_tracer.vec3 import Vector3D, Point3D, Colour, to_unit_vector
+from ray_tracer.vec3 import Vector3D, Point3D, Colour, to_unit_vector, dot
 from ray_tracer.ray import Ray
 
 BASE_DIR = Path('./misc')
-IMAGE_FILE_NAME = 'background.ppm'
+IMAGE_FILE_NAME = 'red_sphere_in_background.ppm'
 OUTPUT_IMAGE_FILE = BASE_DIR.joinpath(IMAGE_FILE_NAME)
 
 
+def hit_sphere(center: Point3D, radius: float, ray: Ray) -> bool:
+    oc: Vector3D = ray.origin - center
+    a = dot(ray.direction, ray.direction)
+    b = 2 * dot(ray.direction, oc)
+    c = dot(oc, oc) - radius ** 2
+    discriminant = b ** 2 - 4 * a * c
+    return discriminant > 0
+
+
 def ray_colour(r: Ray) -> Colour:
+    if hit_sphere(Point3D(0, 0, -1), 0.5, r):
+        return Colour(1, 0, 0)
     unit_direction = to_unit_vector(r.direction)
     t: float = 0.5 * (unit_direction.y + 1.0)
     colour: Vector3D = (1.0 - t) * Colour(1.0, 1.0, 1.0) + t * Colour(0.5, 0.7, 1.0)
