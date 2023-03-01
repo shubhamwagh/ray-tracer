@@ -9,14 +9,14 @@ OUTPUT_IMAGE_FILE = BASE_DIR.joinpath(IMAGE_FILE_NAME)
 
 def hit_sphere(center: Point3D, radius: float, ray: Ray) -> float:
     oc: Vector3D = ray.origin - center
-    a = dot(ray.direction, ray.direction)
-    b = 2 * dot(ray.direction, oc)
-    c = dot(oc, oc) - radius ** 2
-    discriminant = b ** 2 - 4 * a * c
+    a = ray.direction.l2_norm()  # dot(ray.direction, ray.direction)
+    half_b = dot(ray.direction, oc)
+    c = oc.l2_norm() - radius ** 2
+    discriminant = half_b ** 2 - a * c
     if discriminant < 0:
         return -1
     else:
-        return (- b - discriminant ** 0.5) / (2 * a)
+        return (- half_b - discriminant ** 0.5) / a
 
 
 def ray_colour(r: Ray) -> Colour:
@@ -52,6 +52,7 @@ def main() -> None:
     horizontal = Vector3D(viewport_width, 0, 0)
     vertical = Vector3D(0, viewport_height, 0)
     # lower left corner coordinate vector of viewport
+    # TODO add proper transformation between canvas and viewport
     lower_left_corner = origin - horizontal * 0.5 - vertical * 0.5 - Vector3D(0, 0, focal_length)
 
     # Render
